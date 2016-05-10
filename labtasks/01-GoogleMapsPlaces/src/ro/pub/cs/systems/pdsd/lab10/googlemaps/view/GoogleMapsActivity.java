@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import ro.pub.cs.systems.pdsd.lab10.googlemaps.R;
 import ro.pub.cs.systems.pdsd.lab10.googlemaps.controller.PlacesAdapter;
 import ro.pub.cs.systems.pdsd.lab10.googlemaps.general.Constants;
+import ro.pub.cs.systems.pdsd.lab10.googlemaps.general.Utilities;
 import ro.pub.cs.systems.pdsd.lab10.googlemaps.model.Place;
 import android.app.Activity;
 import android.os.Bundle;
@@ -27,8 +28,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 public class GoogleMapsActivity extends Activity implements ConnectionCallbacks, OnConnectionFailedListener {
 	
@@ -63,6 +66,37 @@ public class GoogleMapsActivity extends Activity implements ConnectionCallbacks,
 			// add the MarkerOptions to the Google Map
 			// add the Place information to the places list
 			// notify the placesAdapter that the data set was changed
+			String latitudeContent = latitudeEditText.getText().toString();
+			String longitudeContent = longitudeEditText.getText().toString();
+			String nameContent = nameEditText.getText().toString();
+			
+			if (latitudeContent == null || latitudeContent.isEmpty() ||
+				longitudeContent == null || longitudeContent.isEmpty() ||
+				nameContent == null || nameContent.isEmpty()) {
+				Toast.makeText(GoogleMapsActivity.this, "Valorile coordonatelor nu sunt completate!", Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			double latitudeValue = Double.parseDouble(latitudeContent);
+			double longitudeValue = Double.parseDouble(longitudeContent);
+			navigateToLocation(latitudeValue, longitudeValue);
+			
+			MarkerOptions marker = new MarkerOptions()
+					.position(new LatLng(
+						Double.parseDouble(latitudeContent), 
+						Double.parseDouble(longitudeContent)
+					))
+					.title(nameContent);
+			marker.icon(BitmapDescriptorFactory.defaultMarker(Utilities.getDefaultMarker(markerTypeSpinner.getSelectedItemPosition())));
+			googleMap.addMarker(marker);
+			places.add(new Place(
+					Double.parseDouble(latitudeContent),
+					Double.parseDouble(longitudeContent),
+					nameContent,
+					Utilities.getDefaultMarker(markerTypeSpinner.getSelectedItemPosition())
+					)
+			);
+			placesAdapter.notifyDataSetChanged();
 
 		}
 	}
@@ -78,6 +112,16 @@ public class GoogleMapsActivity extends Activity implements ConnectionCallbacks,
 			// clear the Google Map
 			// clear the places List
 			// notify the placesAdapter that the data set was changed
+			String latitudeContent = latitudeEditText.getText().toString();
+			String longitudeContent = longitudeEditText.getText().toString();
+			String nameContent = nameEditText.getText().toString();
+			
+			if (latitudeContent == null || latitudeContent.isEmpty() ||
+				longitudeContent == null || longitudeContent.isEmpty() ||
+				nameContent == null || nameContent.isEmpty()) {
+				Toast.makeText(GoogleMapsActivity.this, "Valorile coordonatelor nu sunt completate!", Toast.LENGTH_SHORT).show();
+				return;
+			}
 
 		}
 	}	

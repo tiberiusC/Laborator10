@@ -1,11 +1,14 @@
 package ro.pub.cs.systems.pdsd.lab10.googlemaps.service;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 import ro.pub.cs.systems.pdsd.lab10.googlemaps.general.Constants;
 import android.app.IntentService;
 import android.content.Intent;
 import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.ResultReceiver;
@@ -50,6 +53,46 @@ public class GetLocationAddressIntentService extends IntentService {
 		// iterate over the address list
 		// concatenate all lines from each address (number of lines: getMaxAddressLineIndex(); specific line: getAddressLine()
 		// call handleResult method with result (Constants.RESULT_SUCCESS, Constants.RESULT_FAILURE) and the address details / error message
+		
+Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+		
+		
+		try {
+			Log.i(Constants.TAG, "Started searching for the address...");
+			addressList = geocoder.getFromLocation(
+					location.getLatitude(),
+					location.getLongitude(),
+					Constants.NUMBER_OF_ADDRESSES);
+		} catch (IOException ioException) {
+			errorMessage = "The background geocoding service is not available";
+			Log.e(Constants.TAG, "An exception has occurred: " + ioException.getMessage());
+		} catch (IllegalArgumentException illegalArgumentException) {
+			errorMessage = "The latitude / longitude values that were provided are invalid " + location.getLatitude() + " / " + location.getLongitude();
+			Log.e(Constants.TAG, "An exception has occurred: " + illegalArgumentException.getMessage());
+		} finally {
+			Log.i(Constants.TAG, "Finished searching for the address...");
+		}
+		
+		if (errorMessage != null && !errorMessage.isEmpty()) {
+			handleResult(Constants.RESULT_FAILURE, errorMessage);
+			return;
+		}
+		
+		if (addressList == null || addressList.isEmpty()) {
+			errorMessage = "The geocoder could not find an address for the given latitude / longitude";
+			Log.e(Constants.TAG, "An exception has occurred: " + errorMessage);
+			handleResult(Constants.RESULT_FAILURE, errorMessage);
+			return;
+		}
+		
+		StringBuffer result = new StringBuffer();
+		
+		for (Address address: addressList) {
+			for (int k = 0; k < address.getMaxAddressLineIndex(); k++) {
+				result.append(address.getAddressLine(k) + System.getProperty("line.separator"));
+			}
+			result.append(System.getProperty("line.separator"));
+		}
 		
 		errorMessage = "Not implemented yet";
 		handleResult(Constants.RESULT_FAILURE, errorMessage);
